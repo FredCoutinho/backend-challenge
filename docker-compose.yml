@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # 1. Nossa caixa do Banco de Dados
+  postgres:
+    image: postgres:16-alpine
+    container_name: jungle_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0122
+      POSTGRES_DB: jungle_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Nossa caixa das Filas (Simulador da AWS SQS)
+  localstack:
+    image: localstack/localstack:3.5.0
+    container_name: jungle_localstack
+    environment:
+      - SERVICES=sqs
+      - DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./scripts/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+
+volumes:
+  # Isso garante que os dados do banco não sumam se desligarmos a caixa
+  postgres_data:
